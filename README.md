@@ -6,7 +6,7 @@ A [Claude Code](https://claude.com/claude-code) agent that helps develop **Educa
 - **one public wiki** (`wiki/`): concepts, approaches, methods, propositions and the field-level argument, all citable back to the database;
 - **skills** (`.claude/skills/`) that hold *how* the agent works and the judgements it has learned, so later papers and proposals follow the field's development.
 
-**Intro page:** [`docs/index.html`](docs/index.html) (structure, commands, workflow).
+**Intro page:** https://ovgu-vet-teched.github.io/EI_Content_Agent/ (structure, commands, workflow; source: [`docs/index.html`](docs/index.html)).
 **Anchor paper:** Tegelbeckers, H., & Bünning, F. (2026). Education Informatics as a discipline for equitable, evidence-informed and sovereign digital education systems: A critical conceptual review. *Information, 17*(9), 827. https://doi.org/10.3390/info17090827
 
 ## How it works

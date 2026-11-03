@@ -14,12 +14,12 @@
 | Evidence labels | P/R/S/D/M from the earlier EI_Agent work | Keeps verification depth visible everywhere |
 | Proposal skill | Funder-neutral outline + per-call private funder profile | User's instruction: replace the specific DFG Emmy Noether outline with a general one |
 | Repository visibility | Public, OVGU-VET-TechEd | User's choice. Hence: no personal or career data in wiki, skills or commits |
+| GitHub Pages | On, from `main:/docs` (2026-11-03): https://ovgu-vet-teched.github.io/EI_Content_Agent/ | Intro page publicly reachable; only `docs/` is served |
 
 ## Open
 
 | Decision | Default | If changed |
 |---|---|---|
 | Core unit of EI (decision record vs lifelong learner model) | Decision record with a learner-held computed view (recommendation) | Rewrite `concepts/` pages and the uniqueness argument |
-| GitHub Pages for `docs/index.html` | Off | Enable Pages from `/docs` in the repo settings |
 | Sentence-case conversion of APA titles | Not automated (registry capitalisation kept) | Add a converter with an acronym list |
 | German-language wiki pages | English only | Add `lang:` to front matter and parallel pages |
