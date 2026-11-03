@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software or its content, please cite it as below."
+title: "EI_Content_Agent"
+abstract: "A Claude Code agent and structured knowledge base for developing Education Informatics (Bildungsinformatik) as a discipline: literature database with DOI-verified APA/BibTeX, a citable wiki organised by the six criteria of disciplinarity, and skills for papers, discussion and project proposals."
+type: software
+authors:
+  - family-names: Tegelbeckers
+    given-names: Hannes
+    affiliation: "Otto von Guericke University Magdeburg"
+license: MIT
+repository-code: "https://github.com/OVGU-VET-TechEd/EI_Content_Agent"
+version: 0.1.0
+date-released: 2026-11-03
+keywords:
+  - education informatics
+  - Bildungsinformatik
+  - disciplinarity
+  - learning analytics
+  - research agent
+  - knowledge base
+references:
+  - type: article
+    authors:
+      - family-names: Tegelbeckers
+        given-names: Hannes
+      - family-names: Bünning
+        given-names: Frank
+    title: "Education Informatics as a Discipline for Equitable, Evidence-Informed and Sovereign Digital Education Systems: A Critical Conceptual Review"
+    journal: "Information"
+    volume: 17
+    issue: 9
+    start: 827
+    year: 2026
+    doi: "10.3390/info17090827"

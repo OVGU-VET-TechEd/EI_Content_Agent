@@ -1,0 +1,30 @@
+# --- Private data: never commit -------------------------------------------
+ei.config.json
+.claude/settings.local.json
+data/
+backups/
+exports/
+drafts/
+*.csv
+*.csv.tmp
+*.tsv
+*.xlsx
+*.pdf
+*.bib
+*.ris
+*.docx
+*.pptx
+*.jsonl
+seed*.json
+Literature/
+Notes/
+
+# --- Tooling ---------------------------------------------------------------
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.idea/
+.vscode/
+eval/results/*
+!eval/results/.gitkeep

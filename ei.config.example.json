@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to ei.config.json (gitignored) and set your paths. Private data never goes into the repo.",
+  "data_dir": "/absolute/path/to/EI_Knowledge_Base",
+  "literature_dirs": ["/absolute/path/to/Literature"],
+  "wiki_dir": "wiki",
+  "mailto": ""
+}

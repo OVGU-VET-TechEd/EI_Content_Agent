@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EI Content Agent</title>
+<meta name="description" content="How EI_Content_Agent is structured, which commands to use, and how it turns prompts into structured knowledge for Education Informatics.">
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #efede6;
+    --text: #1d1d1b;
+    --muted: #5d5b55;
+    --border: #dcd9cf;
+    --accent: #1f5f8b;
+    --accent-soft: #e3eef6;
+    --private: #8a4b14;
+    --private-soft: #f6eadc;
+    --public: #2f6b3a;
+    --public-soft: #e3f0e4;
+    --warn: #8f2d2d;
+    --warn-soft: #f6e1e1;
+    --code-bg: #f0eee8;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+    --radius: 10px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151614; --surface: #1e201d; --surface-2: #262924; --text: #ecebe6; --muted: #a9a79f;
+      --border: #363a33; --accent: #7db7e0; --accent-soft: #1d3141; --private: #e3a86f; --private-soft: #3a2a1a;
+      --public: #8fcf98; --public-soft: #1e3322; --warn: #ec9a9a; --warn-soft: #3d2222; --code-bg: #262924;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151614; --surface: #1e201d; --surface-2: #262924; --text: #ecebe6; --muted: #a9a79f;
+    --border: #363a33; --accent: #7db7e0; --accent-soft: #1d3141; --private: #e3a86f; --private-soft: #3a2a1a;
+    --public: #8fcf98; --public-soft: #1e3322; --warn: #ec9a9a; --warn-soft: #3d2222; --code-bg: #262924;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  header.hero { padding: 56px 0 28px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin: 8px 0 12px; letter-spacing: -.01em; }
+  h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.005em; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  .lead { font-size: 18px; color: var(--muted); max-width: 720px; margin: 0; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  nav.toc a { font-size: 14px; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 999px; }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+  section { padding: 40px 0 8px; }
+  .sub { color: var(--muted); margin: 0 0 20px; max-width: 760px; }
+  .grid { display: grid; gap: 14px; }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); min-width: 0; }
+  .card p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+  .card ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-bottom: 8px; }
+  .t-private { background: var(--private-soft); color: var(--private); }
+  .t-public { background: var(--public-soft); color: var(--public); }
+  .t-engine { background: var(--accent-soft); color: var(--accent); }
+  code, pre { font-family: var(--mono); font-size: 13.5px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 0; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface-2); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  td code { white-space: nowrap; }
+  .flow { width: 100%; height: auto; display: block; }
+  .flow .box { fill: var(--surface); stroke: var(--border); }
+  .flow .box.hl { stroke: var(--accent); }
+  .flow text { fill: var(--text); font: 600 14px var(--sans); }
+  .flow .small { fill: var(--muted); font: 400 12px var(--sans); }
+  .flow .arrow { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .flow .head { fill: var(--accent); }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px 12px 52px; position: relative; }
+  .steps li::before { content: counter(s); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 14px; display: grid; place-items: center; }
+  .steps b { display: block; }
+  .steps span { color: var(--muted); font-size: 15px; }
+  .crit { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .crit div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+  .crit b { display: block; font-size: 14px; }
+  .chip { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .ok { background: var(--public-soft); color: var(--public); }
+  .part { background: var(--accent-soft); color: var(--accent); }
+  .no { background: var(--warn-soft); color: var(--warn); }
+  .note { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 14px; border-radius: 0 8px 8px 0; color: var(--text); font-size: 15px; }
+  .example { display: grid; gap: 10px; }
+  .bubble { background: var(--accent-soft); color: var(--text); border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-weight: 600; justify-self: start; max-width: 100%; }
+  footer { margin: 48px 0 0; padding: 22px 0 40px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+  a { color: var(--accent); }
+  .flow-mobile { display: none; }
+  @media (max-width: 640px) { .flow { display: none; } .flow-mobile { display: grid; } }
+  @media (max-width: 560px) { header.hero { padding-top: 36px; } th, td { padding: 8px 10px; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Claude Code agent · Education Informatics (Bildungsinformatik)</div>
+    <h1>EI_Content_Agent</h1>
+    <p class="lead">A research partner and domain expert that helps develop Education Informatics as a discipline. It writes papers, gathers and verifies material, and discusses ideas. Every valid finding is recorded in a literature database and a structured wiki, so the field accumulates knowledge instead of re-deriving it.</p>
+    <nav class="toc" aria-label="Contents">
+      <a href="#how">How it works</a><a href="#structure">Structure</a><a href="#commands">Commands</a>
+      <a href="#example">Example</a><a href="#database">Database</a><a href="#lens">Discipline lens</a><a href="#setup">Setup</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="how">
+  <h2>How it works</h2>
+  <p class="sub">You just talk to it. Anything new you mention (a topic, an idea, a DOI, a PDF) runs through the same loop, which leaves the knowledge base better structured than before.</p>
+  <svg class="flow" viewBox="0 0 940 150" role="img" aria-label="Flow: prompt, research, record, structure, learn, check">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+    <g>
+      <rect class="box hl" x="4" y="30" width="130" height="78" rx="10"/>
+      <text x="69" y="62" text-anchor="middle">Prompt</text>
+      <text class="small" x="69" y="84" text-anchor="middle">"I heard about…"</text>
+    </g>
+    <g>
+      <rect class="box" x="165" y="30" width="130" height="78" rx="10"/>
+      <text x="230" y="62" text-anchor="middle">Research</text>
+      <text class="small" x="230" y="84" text-anchor="middle">local · DOI · web</text>
+    </g>
+    <g>
+      <rect class="box" x="326" y="30" width="130" height="78" rx="10"/>
+      <text x="391" y="62" text-anchor="middle">Record</text>
+      <text class="small" x="391" y="84" text-anchor="middle">CSV · APA · BibTeX</text>
+    </g>
+    <g>
+      <rect class="box" x="487" y="30" width="130" height="78" rx="10"/>
+      <text x="552" y="62" text-anchor="middle">Structure</text>
+      <text class="small" x="552" y="84" text-anchor="middle">wiki · criteria</text>
+    </g>
+    <g>
+      <rect class="box" x="648" y="30" width="130" height="78" rx="10"/>
+      <text x="713" y="62" text-anchor="middle">Learn</text>
+      <text class="small" x="713" y="84" text-anchor="middle">update skills</text>
+    </g>
+    <g>
+      <rect class="box hl" x="809" y="30" width="127" height="78" rx="10"/>
+      <text x="872" y="62" text-anchor="middle">Check</text>
+      <text class="small" x="872" y="84" text-anchor="middle">validate · export</text>
+    </g>
+    <path class="arrow" d="M134 69 H161" marker-end="url(#ah)"/>
+    <path class="arrow" d="M295 69 H322" marker-end="url(#ah)"/>
+    <path class="arrow" d="M456 69 H483" marker-end="url(#ah)"/>
+    <path class="arrow" d="M617 69 H644" marker-end="url(#ah)"/>
+    <path class="arrow" d="M778 69 H805" marker-end="url(#ah)"/>
+    <text class="small" x="470" y="140" text-anchor="middle">At every session start a hook backs up the CSV and loads a status line into the agent's context.</text>
+  </svg>
+  <ol class="steps flow-mobile">
+    <li><b>Prompt</b><span>"I heard about…", a DOI, a PDF or an idea</span></li>
+    <li><b>Research</b><span>Local literature, DOI registry, web search</span></li>
+    <li><b>Record</b><span>CSV row with APA, BibTeX, summary, status</span></li>
+    <li><b>Structure</b><span>Wiki pages linked to the six criteria</span></li>
+    <li><b>Learn</b><span>Lasting judgements go into the skills</span></li>
+    <li><b>Check</b><span>Validate, rebuild the index, export for Zotero. A session-start hook backs up the CSV.</span></li>
+  </ol>
+</section>
+
+<section id="structure">
+  <h2>Structure</h2>
+  <p class="sub">Three kinds of store. What is learned lives in exactly one of them.</p>
+  <div class="grid g3">
+    <div class="card">
+      <span class="tag t-private">Private · Nextcloud</span>
+      <h3>Literature database</h3>
+      <p>One CSV, <code>ei_literature.csv</code>, is the single source of truth. Only <code>scripts/eidb.py</code> writes it; a hook blocks direct edits.</p>
+      <ul><li><code>backups/</code>: one copy per session</li><li><code>exports/</code>: <code>library.bib</code>, <code>library.ris</code> for Zotero</li><li><code>drafts/</code>: papers and proposals</li></ul>
+    </div>
+    <div class="card">
+      <span class="tag t-public">Public · GitHub</span>
+      <h3>Wiki: what is known</h3>
+      <p>Concepts, approaches, methods, propositions and the field-level argument. Each claim cites the database with <code>[@citekey]</code>.</p>
+      <ul><li><code>discipline/</code>: definition, criteria, uniqueness, rivals</li><li><code>approaches/</code>: characteristics grid</li><li><code>log.md</code>: what changed, per session</li></ul>
+    </div>
+    <div class="card">
+      <span class="tag t-engine">Public · GitHub</span>
+      <h3>Skills: how to work</h3>
+      <p>Workflows and recurring judgements (e.g. "measure the room, not the child"). <code>ei-learn</code> keeps them current as the field develops.</p>
+      <ul><li><code>CLAUDE.md</code>: persona, routing, standing rules</li><li><code>templates/</code>: page types, proposal outline</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="commands">
+  <h2>Commands</h2>
+  <p class="sub">Type them as slash commands, or just write naturally. The agent routes "I heard about…" to <code>ei-ingest</code> on its own.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Command</th><th>Use it when you want to…</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>/ei-ingest</code></td><td>Research a topic, record the sources, update the wiki, and learn</td><td>I heard about learner portfolios from the UK</td></tr>
+        <tr><td><code>/ei-add-paper</code></td><td>Record one reference, with APA and BibTeX from its DOI</td><td>Add 10.1111/jedm.12000</td></tr>
+        <tr><td><code>/ei-discuss</code></td><td>Think an idea through with a candid expert</td><td>Could expiry of inferences be EI's method?</td></tr>
+        <tr><td><code>/ei-proposition-stress-test</code></td><td>Get for-and-against verdicts on notes or ideas</td><td>Test my notes from the Tbilisi conference</td></tr>
+        <tr><td><code>/ei-uniqueness-argument</code></td><td>Answer "a new field has no method of its own"</td><td>Is EI just Learning Engineering renamed?</td></tr>
+        <tr><td><code>/ei-write</code></td><td>Draft paper sections grounded in the database</td><td>Intro section on decision records</td></tr>
+        <tr><td><code>/ei-proposal</code></td><td>Turn an idea into a proposal for any funder</td><td>ERC StG on Education Informatics</td></tr>
+        <tr><td><code>/ei-source-and-legal-check</code></td><td>Check citations, evidence labels, AI Act lines, AI disclosure</td><td>Check this draft before submission</td></tr>
+        <tr><td><code>/ei-wiki</code></td><td>Create, merge or fix wiki pages</td><td>Split the portfolios page by sector</td></tr>
+        <tr><td><code>/ei-status</code></td><td>See what the knowledge base holds and what is next</td><td>Where are we?</td></tr>
+        <tr><td><code>/ei-learn</code></td><td>Fold lasting lessons into the skills</td><td>Remember this rule for proposals</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="example">
+  <h2>Example: two prompts</h2>
+  <div class="grid g2">
+    <div class="card example">
+      <div class="bubble">I heard about data-based approaches for education.</div>
+      <ol class="steps">
+        <li><b>Research</b><span>Local literature, Crossref search, web search; reads abstracts and PDFs.</span></li>
+        <li><b>Record</b><span><code>eidb.py add --doi …</code> for each source: APA, BibTeX, summary, status, criteria.</span></li>
+        <li><b>Structure</b><span>Writes <code>wiki/approaches/data-based-approaches.md</code> with the 13-characteristic grid.</span></li>
+        <li><b>Propagate</b><span>Rival fields, criteria board, uniqueness argument, open questions, log.</span></li>
+      </ol>
+    </div>
+    <div class="card example">
+      <div class="bubble">I heard about learner portfolios from the UK.</div>
+      <ol class="steps">
+        <li><b>Check first</b><span>Finds existing entries and pages; updates instead of duplicating.</span></li>
+        <li><b>Record</b><span>New UK sources added; duplicates detected by DOI and title.</span></li>
+        <li><b>Structure</b><span><code>approaches/learner-portfolios.md</code> placed on the same grid; the grid grows if needed.</span></li>
+        <li><b>Learn</b><span>Lasting judgements go into a skill; the wiki index and <code>.bib</code>/<code>.ris</code> are regenerated.</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="database">
+  <h2>The literature database</h2>
+  <p class="sub">One row per reference. Bibliographic data come from the DOI registry, so the agent never types a reference from memory.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Columns</h3>
+      <p><code>id</code> <code>type</code> <code>authors</code> <code>year</code> <code>title</code> <code>venue</code> <code>volume</code> <code>issue</code> <code>pages</code> <code>doi</code> <code>url</code> <code>apa</code> <code>bibtex</code> <code>summary</code> <code>topics</code> <code>ei_criteria</code> <code>ei_role</code> <code>wiki_pages</code> <code>source_status</code> <code>verified_via</code> <code>local_file</code> <code>added_on</code> <code>added_by_query</code> <code>notes</code></p>
+    </div>
+    <div class="card">
+      <h3>Evidence status</h3>
+      <ul>
+        <li><b>P</b>: primary text read in full</li>
+        <li><b>R</b>: cited in the anchor paper, not re-read</li>
+        <li><b>S</b>: DOI record or abstract only</li>
+        <li><b>D</b>: from the user's notes or slides</li>
+        <li><b>M</b>: from model memory, unconfirmed</li>
+      </ul>
+    </div>
+  </div>
+<pre><code>python3 scripts/eidb.py search "Kane 2013 validating interpretations"
+python3 scripts/eidb.py add --doi 10.1111/jedm.12000 --summary "…" --criteria methods --role method --status S
+python3 scripts/eidb.py list --criterion methods        # evidence for criterion C5
+python3 scripts/eidb.py sync &amp;&amp; python3 scripts/eidb.py validate
+python3 scripts/eidb.py export                          # library.bib / library.ris → Zotero</code></pre>
+</section>
+
+<section id="lens">
+  <h2>The discipline lens</h2>
+  <p class="sub">Every source and page is tagged with the six criteria of disciplinarity adopted in the anchor paper (Tegelbeckers &amp; Bünning, 2026). The standard critique that a new field lacks a method of its own targets C5. The agent's working answer is a specific <em>combination</em> (decision record, decision-value test, expiry as data). It is labelled as a proposal, not a finding.</p>
+  <div class="crit">
+    <div><b>C1 Object</b><span class="chip ok">specified</span></div>
+    <div><b>C2 Knowledge</b><span class="chip no">not satisfied</span></div>
+    <div><b>C3 Theories</b><span class="chip part">partly</span></div>
+    <div><b>C4 Terminology</b><span class="chip part">partly</span></div>
+    <div><b>C5 Methods</b><span class="chip part">partly</span></div>
+    <div><b>C6 Institutions</b><span class="chip no">not satisfied</span></div>
+  </div>
+</section>
+
+<section id="setup">
+  <h2>Setup</h2>
+<pre><code>git clone https://github.com/OVGU-VET-TechEd/EI_Content_Agent.git &amp;&amp; cd EI_Content_Agent
+cp ei.config.example.json ei.config.json   # set data_dir and literature_dirs
+python3 scripts/eidb.py init
+claude                                     # start the agent here</code></pre>
+  <p class="note" style="margin-top:16px"><b>Privacy:</b> the database, backups, exports, drafts, PDFs and notes never enter git. The CI checks this. The wiki is public, so it never contains personal or career details or unpublished third-party material.</p>
+</section>
+
+</main>
+<footer>
+  <div class="wrap">EI_Content_Agent v0.1.0 · Otto von Guericke University Magdeburg · Code MIT, content CC BY 4.0 · Anchor paper: <a href="https://doi.org/10.3390/info17090827">doi.org/10.3390/info17090827</a></div>
+</footer>
+</body>
+</html>
